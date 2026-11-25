@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Teleprompter</title>
+  <title>Voice Teleprompter</title>
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="js/app.js"></script>
 </head>
 <body>
   <header class="toolbar" id="toolbar">
     <div class="toolbar-group">
-      <strong class="brand">Teleprompter</strong>
+      <strong class="brand">Voice Teleprompter</strong>
       <button type="button" class="btn" id="editButton" title="Editar roteiro (E)">✎ Roteiro</button>
     </div>
 
@@ -179,6 +179,7 @@
           <input type="file" id="fileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
         </label>
         <button type="button" class="btn" id="sampleButton">Texto de exemplo</button>
+        <button type="button" class="btn btn-prompt" id="copyPromptButton" title="Copia um prompt para pedir a uma IA que adapte seu texto ao modo de leitura por voz">✨ Copiar prompt para ajustar seu roteiro</button>
         <span class="spacer"></span>
         <button type="submit" class="btn" value="cancel">Cancelar</button>
         <button type="submit" class="btn btn-primary" value="apply">Aplicar</button>

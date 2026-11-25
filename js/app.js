@@ -6,6 +6,7 @@ import { PaceMeter } from './pace-meter.js';
 import { startCountdown } from './countdown.js';
 import { bindKeyboard } from './keyboard.js';
 import { SAMPLE_SCRIPT } from './sample-script.js';
+import { SCRIPT_PROMPT } from './script-prompt.js';
 import { clamp, formatDuration } from './text-utils.js';
 import { applySettings, bindSettingControls, loadSettings, saveSettings, syncControls } from './settings.js';
 
@@ -31,14 +32,14 @@ const ELEMENT_IDS = [
   'paceMetric', 'remainingMetric', 'progressBar', 'playButton', 'resetButton', 'editButton',
   'slowerButton', 'fasterButton', 'themeButton', 'mirrorButton', 'fullscreenButton',
   'settingsButton', 'closeSettingsButton', 'settingsPanel', 'editorDialog', 'editorText',
-  'fileInput', 'sampleButton', 'modeSelect', 'toast',
+  'fileInput', 'sampleButton', 'copyPromptButton', 'modeSelect', 'toast',
 ];
 
 const elements = Object.fromEntries(ELEMENT_IDS.map((id) => [id, document.getElementById(id)]));
 const settings = loadSettings();
 const karaoke = new Karaoke(elements.track);
 const pace = new PaceMeter();
-const state = { running: false, cancelCountdown: null, blockStarts: [], guideCenter: 0, wheelTimer: null, toastTimer: null };
+const state = { running: false, cancelCountdown: null, blockStarts: [], guideCenter: 0, wheelTimer: null, toastTimer: null, promptTimer: null };
 
 const tracker = new VoiceTracker({
   onAdvance: handleVoiceAdvance,
@@ -324,6 +325,36 @@ async function importFile(file) {
   elements.editorText.value = await file.text();
 }
 
+/** Clipboard API needs a secure context; fall back to a throwaway textarea elsewhere. */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const scratch = document.createElement('textarea');
+    scratch.value = text;
+    scratch.setAttribute('readonly', '');
+    scratch.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+    document.body.append(scratch);
+    scratch.select();
+    const copied = document.execCommand?.('copy') ?? false;
+    scratch.remove();
+    return copied;
+  }
+}
+
+async function copyScriptPrompt() {
+  const copied = await copyText(SCRIPT_PROMPT);
+  showToast(copied
+    ? 'Prompt copiado. Cole numa IA junto com o seu texto e traga o roteiro pronto de volta para cá.'
+    : 'Não foi possível copiar. Selecione o texto do prompt manualmente.');
+  elements.copyPromptButton.textContent = copied ? '✓ Prompt copiado' : '✨ Copiar prompt para ajustar seu roteiro';
+  clearTimeout(state.promptTimer);
+  state.promptTimer = setTimeout(() => {
+    elements.copyPromptButton.textContent = '✨ Copiar prompt para ajustar seu roteiro';
+  }, TOAST_MS);
+}
+
 /* ---------- Bindings ---------- */
 
 function bindButtons() {
@@ -374,6 +405,7 @@ function bindEditor() {
   elements.sampleButton.addEventListener('click', () => {
     elements.editorText.value = SAMPLE_SCRIPT;
   });
+  elements.copyPromptButton.addEventListener('click', copyScriptPrompt);
 }
 
 function keyboardActions() {

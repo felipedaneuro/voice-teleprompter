@@ -456,3 +456,10 @@ code {
   .word, .progress-bar { transition: none; }
   .countdown.tick, .status[data-state="speaking"]::before { animation: none; }
 }
+
+.btn-prompt {
+  border-color: color-mix(in srgb, var(--ui-accent) 55%, var(--ui-border));
+  color: var(--ui-text);
+}
+
+.btn-prompt:hover { border-color: var(--ui-accent); }

@@ -1,4 +1,6 @@
-# Teleprompter com rolagem por voz
+# Voice Teleprompter
+
+**No ar:** https://voiceteleprompter.vercel.app
 
 Teleprompter web em HTML, CSS e JavaScript puros, sem dependências. No modo **voz** ele acompanha a sua leitura pelo microfone como um karaokê: a palavra atual fica destacada e o texto só sobe depois que você a leu. Se você pausar ou improvisar, ele espera.
 
@@ -7,7 +9,7 @@ Teleprompter web em HTML, CSS e JavaScript puros, sem dependências. No modo **v
 O navegador só libera o microfone em `localhost` ou `https`, então sirva a pasta com um servidor local:
 
 ```bash
-cd ~/Projects/teleprompter && python3 -m http.server 5173
+cd ~/Projects/voice-teleprompter && python3 -m http.server 5173
 ```
 
 Depois abra http://localhost:5173 no **Chrome**, **Edge** ou **Safari**.
@@ -23,6 +25,7 @@ Depois abra http://localhost:5173 no **Chrome**, **Edge** ou **Safari**.
 - **Contraste**: branco, amarelo ou verde sobre preto, creme sobre grafite e preto sobre branco. A opacidade do texto já lido é ajustável.
 - **Guia de leitura**: faixa e/ou setas com posição vertical ajustável, para manter os olhos perto da lente.
 - **Contagem regressiva** configurável de 0 a 10 s.
+- **Prompt de adaptação**: o botão *Copiar prompt para ajustar seu roteiro*, dentro do editor, copia um prompt que ensina uma IA a reescrever seu texto no ritmo que o reconhecimento de voz acompanha melhor.
 - **Espelhamento** horizontal e vertical (para vidro beam-splitter), **tela cheia** e interface clara/escura.
 - Barra de progresso, tempo restante estimado e indicador do microfone.
 
@@ -57,4 +60,6 @@ js/countdown.js     contagem regressiva
 js/pace-meter.js    palavras por minuto em tempo real
 js/keyboard.js      atalhos de teclado
 js/text-utils.js    normalização e comparação tolerante de palavras
+js/script-prompt.js prompt que ensina uma IA a adaptar roteiros
+js/sample-script.js roteiro de exemplo
 ```
