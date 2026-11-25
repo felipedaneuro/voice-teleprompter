@@ -4,3 +4,5 @@
 !.env.example
 *.mov
 *.mp4
+.vercel
+.env*
