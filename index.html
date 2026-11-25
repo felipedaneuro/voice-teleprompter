@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark" data-palette="white" data-guide="both">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teleprompter</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="toolbar" id="toolbar">
+    <div class="toolbar-group">
+      <strong class="brand">Teleprompter</strong>
+      <button type="button" class="btn" id="editButton" title="Editar roteiro (E)">✎ Roteiro</button>
+    </div>
+
+    <div class="toolbar-group">
+      <label class="field-inline" title="Modo de rolagem">
+        <span class="sr-only">Modo</span>
+        <select data-setting="mode" id="modeSelect">
+          <option value="voice">🎙 Voz (karaokê)</option>
+          <option value="auto">⏱ Automático</option>
+        </select>
+      </label>
+      <button type="button" class="btn btn-primary" id="playButton" title="Iniciar / pausar (Espaço)">▶ Iniciar</button>
+      <button type="button" class="btn" id="resetButton" title="Voltar ao início (R)">⟲</button>
+    </div>
+
+    <div class="toolbar-group speed-group" id="speedGroup" title="Velocidade da rolagem automática (↑ / ↓)">
+      <span class="label">Velocidade</span>
+      <button type="button" class="btn btn-icon" id="slowerButton" aria-label="Mais devagar">−</button>
+      <input type="range" min="0.1" max="10" step="0.1" data-setting="speed" aria-label="Velocidade">
+      <button type="button" class="btn btn-icon" id="fasterButton" aria-label="Mais rápido">+</button>
+      <output data-for="speed" class="value"></output>
+    </div>
+
+    <div class="toolbar-group">
+      <button type="button" class="btn btn-icon" id="themeButton" title="Interface clara / escura">◐</button>
+      <button type="button" class="btn btn-icon" id="mirrorButton" title="Espelhar horizontalmente (M)">⇋</button>
+      <button type="button" class="btn btn-icon" id="fullscreenButton" title="Tela cheia (F)">⛶</button>
+      <button type="button" class="btn" id="settingsButton" title="Ajustes">⚙ Ajustes</button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="mirror" id="mirror">
+      <div class="viewport" id="viewport">
+        <div class="track" id="track">
+          <article class="script" id="script" aria-live="off"></article>
+        </div>
+      </div>
+      <div class="guide" id="guide" aria-hidden="true">
+        <span class="guide-arrow guide-arrow-left"></span>
+        <span class="guide-arrow guide-arrow-right"></span>
+      </div>
+    </div>
+
+    <div class="countdown" id="countdown" hidden></div>
+
+    <footer class="hud" id="hud">
+      <span class="status" id="status" data-state="idle">Pronto</span>
+      <span class="transcript" id="transcript"></span>
+      <span class="metric" id="paceMetric" title="Palavras por minuto"></span>
+      <span class="metric" id="remainingMetric" title="Tempo restante estimado"></span>
+      <div class="progress" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+    </footer>
+  </main>
+
+  <aside class="panel" id="settingsPanel" aria-label="Ajustes" hidden>
+    <div class="panel-header">
+      <h2>Ajustes</h2>
+      <button type="button" class="btn btn-icon" id="closeSettingsButton" aria-label="Fechar">✕</button>
+    </div>
+
+    <section>
+      <h3>Tipografia</h3>
+      <label class="field">Tamanho da fonte <output data-for="fontSize"></output>
+        <input type="range" min="24" max="160" step="1" data-setting="fontSize">
+      </label>
+      <label class="field">Espaçamento entre linhas <output data-for="lineHeight"></output>
+        <input type="range" min="1" max="2.4" step="0.05" data-setting="lineHeight">
+      </label>
+      <label class="field">Margens laterais <output data-for="margin"></output>
+        <input type="range" min="0" max="40" step="1" data-setting="margin">
+      </label>
+      <label class="field">Fonte
+        <select data-setting="fontFamily">
+          <option value="sans">Sem serifa (sistema)</option>
+          <option value="serif">Serifada</option>
+          <option value="rounded">Arredondada</option>
+          <option value="mono">Monoespaçada</option>
+        </select>
+      </label>
+      <label class="field">Peso
+        <select data-setting="fontWeight">
+          <option value="400">Regular</option>
+          <option value="600">Seminegrito</option>
+          <option value="800">Negrito</option>
+        </select>
+      </label>
+    </section>
+
+    <section>
+      <h3>Cores do texto</h3>
+      <label class="field">Contraste
+        <select data-setting="palette">
+          <option value="white">Branco sobre preto</option>
+          <option value="yellow">Amarelo sobre preto</option>
+          <option value="green">Verde sobre preto</option>
+          <option value="soft">Creme sobre grafite</option>
+          <option value="paper">Preto sobre branco</option>
+        </select>
+      </label>
+      <label class="field">Opacidade do texto já lido <output data-for="readOpacity"></output>
+        <input type="range" min="0.1" max="1" step="0.05" data-setting="readOpacity">
+      </label>
+    </section>
+
+    <section>
+      <h3>Guia de leitura</h3>
+      <label class="field">Estilo
+        <select data-setting="guideStyle">
+          <option value="both">Faixa + setas</option>
+          <option value="band">Só faixa</option>
+          <option value="arrows">Só setas</option>
+          <option value="none">Nenhum</option>
+        </select>
+      </label>
+      <label class="field">Posição vertical <output data-for="guidePosition"></output>
+        <input type="range" min="10" max="70" step="1" data-setting="guidePosition">
+      </label>
+      <p class="hint">Deixe a guia perto do topo para que seus olhos fiquem próximos da lente da câmera.</p>
+    </section>
+
+    <section>
+      <h3>Reprodução</h3>
+      <label class="field">Contagem regressiva <output data-for="countdown"></output>
+        <input type="range" min="0" max="10" step="1" data-setting="countdown">
+      </label>
+      <label class="field">Idioma da voz
+        <select data-setting="language">
+          <option value="pt-BR">Português (Brasil)</option>
+          <option value="pt-PT">Português (Portugal)</option>
+          <option value="en-US">English (US)</option>
+          <option value="es-ES">Español</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" data-setting="showTranscript"> Mostrar o que o microfone ouviu</label>
+      <label class="check"><input type="checkbox" data-setting="mirrorX"> Espelhar horizontalmente</label>
+      <label class="check"><input type="checkbox" data-setting="mirrorY"> Espelhar verticalmente</label>
+    </section>
+
+    <section class="shortcuts">
+      <h3>Atalhos</h3>
+      <dl>
+        <dt>Espaço</dt><dd>Iniciar / pausar</dd>
+        <dt>↑ ↓</dt><dd>Velocidade (±0,1)</dd>
+        <dt>← →</dt><dd>Parágrafo anterior / próximo</dd>
+        <dt>+ −</dt><dd>Tamanho da fonte</dd>
+        <dt>R</dt><dd>Voltar ao início</dd>
+        <dt>E</dt><dd>Editar roteiro</dd>
+        <dt>M</dt><dd>Espelhar</dd>
+        <dt>F</dt><dd>Tela cheia</dd>
+        <dt>Esc</dt><dd>Parar / fechar</dd>
+        <dt>Clique</dt><dd>Pular para a palavra</dd>
+      </dl>
+    </section>
+  </aside>
+
+  <dialog class="editor" id="editorDialog">
+    <form method="dialog" class="editor-form" id="editorForm">
+      <div class="panel-header">
+        <h2>Roteiro (Markdown)</h2>
+        <span class="hint">Use <code>[colchetes]</code> para notas de direção que não precisam ser lidas e <code>---</code> para pausas.</span>
+      </div>
+      <textarea id="editorText" spellcheck="true" aria-label="Texto do roteiro"></textarea>
+      <div class="editor-actions">
+        <label class="btn">📂 Importar .md / .txt
+          <input type="file" id="fileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
+        </label>
+        <button type="button" class="btn" id="sampleButton">Texto de exemplo</button>
+        <span class="spacer"></span>
+        <button type="submit" class="btn" value="cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" value="apply">Aplicar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>
